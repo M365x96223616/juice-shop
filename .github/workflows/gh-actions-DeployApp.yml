@@ -24,11 +24,11 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-    - run: az acr login --name ${{ secrets.CONTAINERREGISTRY }}
+    - run: az acr login --name acrdevsecops${{ secrets.LABINSTANCEID }}
 
-    - run: docker build . -t ${{ secrets.CONTAINERREGISTRY }}.azurecr.io/devsecops:${{ github.run_id }}
+    - run: docker build . -t acrdevsecops${{ secrets.LABINSTANCEID }}.azurecr.io/devsecops:${{ github.run_id }}
     
-    - run: docker push ${{ secrets.CONTAINERREGISTRY }}.azurecr.io/devsecops:${{ github.run_id }}
+    - run: docker push acrdevsecops${{ secrets.LABINSTANCEID }}.azurecr.io/devsecops:${{ github.run_id }}
 
   Deploy_Dev_Stage_Deploy_to_Dev:
     # 'Note: Azure DevOps strategy>runOnce does not have an equivalent in GitHub Actions yet, and only the deploy steps are transferred to steps'
@@ -47,12 +47,12 @@ jobs:
     
     - uses: azure/appservice-settings@v1
       with:
-        app-name: '${{ secrets.DEVAPPNAME }}'
-        general-settings-json: '{"linuxFxVersion": "DOCKER|${{ secrets.CONTAINERREGISTRY }}.azurecr.io/devsecops:${{ github.run_id }}"}' 
+        app-name: 'juiceshop-dev-devsecops-${{ secrets.LABINSTANCEID }} '
+        general-settings-json: '{"linuxFxVersion": "DOCKER|acrdevsecops${{ secrets.LABINSTANCEID }}.azurecr.io/devsecops:${{ github.run_id }}"}' 
 
     - uses: Azure/cli@v1.0.0
       with:
-        inlineScript: az webapp restart --resource-group ${{ secrets.DEVRESOURCEGROUP }}  --name ${{ secrets.DEVAPPNAME }} 
+        inlineScript: az webapp restart --resource-group rg-juiceshop-dev-lod  --name juiceshop-dev-devsecops-${{ secrets.LABINSTANCEID }} 
 
   Deploy_Prod_Stage_Deploy_to_Prod:
     # 'Note: Azure DevOps strategy>runOnce does not have an equivalent in GitHub Actions yet, and only the deploy steps are transferred to steps'
@@ -72,9 +72,9 @@ jobs:
     
     - uses: azure/appservice-settings@v1
       with:
-        app-name: '${{ secrets.PRODAPPNAME }}'
-        general-settings-json: '{"linuxFxVersion": "DOCKER|${{ secrets.CONTAINERREGISTRY }}.azurecr.io/devsecops:${{ github.run_id }}"}' 
+        app-name: 'juiceshop-prod-devsecops-${{ secrets.LABINSTANCEID }} '
+        general-settings-json: '{"linuxFxVersion": "DOCKER|acrdevsecops${{ secrets.CONTAINERREGISTRY }}.azurecr.io/devsecops:${{ github.run_id }}"}' 
 
     - uses: Azure/cli@v1.0.0
       with:
-        inlineScript: az webapp restart --resource-group ${{ secrets.PRODRESOURCEGROUP }}  --name ${{ secrets.PRODAPPNAME }} 
+        inlineScript: az webapp restart --resource-group rg-juiceshop-prod-lod  --name juiceshop-prod-devsecops-${{ secrets.LABINSTANCEID }} 

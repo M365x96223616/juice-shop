@@ -2,7 +2,7 @@ name: Microsoft Security DevOps
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   sample:
